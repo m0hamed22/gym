@@ -148,9 +148,13 @@
 
   function initials(n){ return n.trim().split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase()||'?'; }
   function status(end){
-    const t=new Date(); t.setHours(0,0,0,0);
-    const e=new Date(end); e.setHours(0,0,0,0);
-    const d=Math.round((e-t)/86400000);
+    const now = new Date();
+    const todayStr = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+    const [ty,tm,td] = todayStr.split('-').map(Number);
+    const [ey,em,ed] = end.split('-').map(Number);
+    const t = new Date(ty,tm-1,td);
+    const e = new Date(ey,em-1,ed);
+    const d = Math.round((e-t)/86400000);
     if(d<0) return{l:'منتهي',c:'expired',d};
     if(d<=7) return{l:'ينتهي قريباً',c:'expiring',d};
     return{l:'نشط',c:'active',d};
@@ -200,10 +204,10 @@
     }
     const bc={'active':'ba','expiring':'bw','expired':'be'};
     const dc={'active':'ok','expiring':'warn','expired':'over'};
-    list.innerHTML=filtered.map(m=>{
+    list.innerHTML = filtered.map(m=>{
       const s=status(m.end);
       const dt=s.d<0?`انتهى منذ ${Math.abs(s.d)} يوم`:s.d===0?'ينتهي اليوم':`متبقي ${s.d} يوم`;
-      return`<div class="mcard">
+      return`<div class="mcard" data-id="${m.id}">
         <div class="mavatar">${initials(m.name)}</div>
         <div class="minfo">
           <div class="mname">${m.name}</div>
@@ -213,10 +217,18 @@
         <div class="mright">
           <span class="badge ${bc[s.c]}">${s.l}</span>
           <span class="pkgtag">${m.pkg}</span>
-          <button class="delbtn" onclick="delMember(${m.id})" aria-label="حذف"><i class="ti ti-trash"></i></button>
+          <button class="delbtn" data-del="${m.id}" aria-label="حذف"><i class="ti ti-trash"></i></button>
         </div>
       </div>`;
     }).join('');
+
+    list.querySelectorAll('.delbtn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = Number(btn.getAttribute('data-del'));
+        members = members.filter(m => m.id !== id);
+        render();
+      });
+    });
   }
   render();
 </script>
