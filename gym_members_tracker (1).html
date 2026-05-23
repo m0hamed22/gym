@@ -1,0 +1,268 @@
+
+<style>
+  * { box-sizing: border-box; }
+  .gm-wrap { padding: 1rem 0.5rem 2rem; }
+  .gm-header { display: flex; align-items: center; gap: 12px; margin-bottom: 1.25rem; padding-bottom: 1rem; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .gm-logo { width: 42px; height: 42px; border-radius: 12px; background: #534AB7; display: flex; align-items: center; justify-content: center; }
+  .gm-logo i { font-size: 22px; color: #fff; }
+  .gm-title { font-size: 17px; font-weight: 500; color: var(--color-text-primary); margin: 0 0 2px; }
+  .gm-sub { font-size: 12px; color: var(--color-text-secondary); margin: 0; }
+  .gm-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1.25rem; }
+  .gm-stat { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 12px; text-align: center; }
+  .gm-stat-num { font-size: 22px; font-weight: 500; color: var(--color-text-primary); }
+  .gm-stat-lbl { font-size: 11px; color: var(--color-text-secondary); margin-top: 2px; }
+  .gm-stat-num.active { color: #534AB7; }
+  .gm-stat-num.expiring { color: #BA7517; }
+  .gm-stat-num.expired { color: #A32D2D; }
+  .gm-form { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.1rem; margin-bottom: 1.25rem; }
+  .gm-form-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .gm-lbl { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 4px; font-weight: 500; letter-spacing: 0.03em; text-transform: uppercase; }
+  .gm-input { width: 100%; background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 8px 10px; font-size: 13px; color: var(--color-text-primary); font-family: var(--font-sans); outline: none; }
+  .gm-input:focus { border-color: #7F77DD; box-shadow: 0 0 0 3px rgba(127,119,221,0.15); }
+  .gm-add-row { display: flex; gap: 8px; align-items: center; }
+  .gm-select { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 8px 10px; font-size: 13px; color: var(--color-text-primary); font-family: var(--font-sans); outline: none; flex: 1; }
+  .gm-btn-add { background: #534AB7; color: #fff; border: none; border-radius: var(--border-radius-md); padding: 8px 18px; font-size: 13px; font-family: var(--font-sans); cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .gm-btn-add:hover { background: #3C3489; }
+  .gm-btn-add:active { transform: scale(0.97); }
+  .gm-search-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .gm-search-wrap { flex: 1; position: relative; }
+  .gm-search-wrap i { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 15px; color: var(--color-text-tertiary); pointer-events: none; }
+  .gm-search { width: 100%; background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 8px 10px 8px 32px; font-size: 13px; color: var(--color-text-primary); font-family: var(--font-sans); outline: none; }
+  .gm-search:focus { border-color: #7F77DD; }
+  .gm-filter-btns { display: flex; gap: 6px; }
+  .gm-filter { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: 20px; padding: 5px 12px; font-size: 12px; color: var(--color-text-secondary); cursor: pointer; font-family: var(--font-sans); white-space: nowrap; }
+  .gm-filter.active { background: #EEEDFE; border-color: #AFA9EC; color: #3C3489; font-weight: 500; }
+  .gm-table-wrap { overflow-x: auto; border-radius: var(--border-radius-lg); border: 0.5px solid var(--color-border-tertiary); }
+  .gm-table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; min-width: 520px; }
+  .gm-table th { background: var(--color-background-secondary); padding: 10px 12px; text-align: right; font-size: 11px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .gm-table th:first-child, .gm-table td:first-child { text-align: right; }
+  .gm-table td { padding: 10px 12px; color: var(--color-text-primary); border-bottom: 0.5px solid var(--color-border-tertiary); vertical-align: middle; }
+  .gm-table tr:last-child td { border-bottom: none; }
+  .gm-table tr:hover td { background: var(--color-background-secondary); }
+  .gm-avatar { width: 30px; height: 30px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; background: #EEEDFE; color: #534AB7; flex-shrink: 0; }
+  .gm-name-cell { display: flex; align-items: center; gap: 8px; }
+  .badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 500; }
+  .badge-active { background: #EAF3DE; color: #3B6D11; }
+  .badge-expiring { background: #FAEEDA; color: #854F0B; }
+  .badge-expired { background: #FCEBEB; color: #A32D2D; }
+  .gm-days { font-size: 12px; }
+  .gm-days.ok { color: #3B6D11; }
+  .gm-days.warn { color: #854F0B; }
+  .gm-days.over { color: #A32D2D; }
+  .gm-del { background: none; border: none; cursor: pointer; color: var(--color-text-tertiary); padding: 4px; border-radius: 6px; font-size: 15px; display: flex; }
+  .gm-del:hover { color: #A32D2D; background: #FCEBEB; }
+  .gm-empty { text-align: center; padding: 2rem; color: var(--color-text-secondary); font-size: 13px; }
+  .gm-note { font-size: 11px; color: var(--color-text-tertiary); margin-top: 8px; text-align: center; }
+  .col-name { width: 32%; }
+  .col-start { width: 17%; }
+  .col-end { width: 17%; }
+  .col-pkg { width: 14%; }
+  .col-status { width: 14%; }
+  .col-del { width: 6%; }
+</style>
+
+<h2 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">سجل اشتراكات الجيم</h2>
+
+<div class="gm-wrap">
+
+  <div class="gm-header">
+    <div class="gm-logo"><i class="ti ti-barbell" aria-hidden="true"></i></div>
+    <div>
+      <p class="gm-title">سجل الاشتراكات</p>
+      <p class="gm-sub">إدارة أعضاء الجيم</p>
+    </div>
+  </div>
+
+  <div class="gm-stats">
+    <div class="gm-stat">
+      <div class="gm-stat-num active" id="cnt-active">0</div>
+      <div class="gm-stat-lbl">نشط</div>
+    </div>
+    <div class="gm-stat">
+      <div class="gm-stat-num expiring" id="cnt-expiring">0</div>
+      <div class="gm-stat-lbl">ينتهي قريباً</div>
+    </div>
+    <div class="gm-stat">
+      <div class="gm-stat-num expired" id="cnt-expired">0</div>
+      <div class="gm-stat-lbl">منتهي</div>
+    </div>
+  </div>
+
+  <div class="gm-form">
+    <div class="gm-form-grid">
+      <div>
+        <div class="gm-lbl">اسم العضو</div>
+        <input class="gm-input" id="inp-name" type="text" placeholder="مثال: أحمد محمد" dir="rtl" />
+      </div>
+      <div>
+        <div class="gm-lbl">تاريخ البداية</div>
+        <input class="gm-input" id="inp-start" type="date" />
+      </div>
+      <div>
+        <div class="gm-lbl">تاريخ الانتهاء</div>
+        <input class="gm-input" id="inp-end" type="date" />
+      </div>
+    </div>
+    <div class="gm-add-row">
+      <div class="gm-lbl" style="margin:0; white-space:nowrap;">الباقة:</div>
+      <select class="gm-select" id="inp-pkg">
+        <option value="شهري">شهري</option>
+        <option value="3 شهور">3 شهور</option>
+        <option value="6 شهور">6 شهور</option>
+        <option value="سنوي">سنوي</option>
+      </select>
+      <button class="gm-btn-add" onclick="addMember()">
+        <i class="ti ti-plus" aria-hidden="true"></i> إضافة
+      </button>
+    </div>
+  </div>
+
+  <div class="gm-search-row">
+    <div class="gm-search-wrap">
+      <i class="ti ti-search" aria-hidden="true"></i>
+      <input class="gm-search" id="inp-search" type="text" placeholder="ابحث باسم العضو..." dir="rtl" oninput="render()" />
+    </div>
+    <div class="gm-filter-btns">
+      <button class="gm-filter active" data-f="all" onclick="setFilter('all',this)">الكل</button>
+      <button class="gm-filter" data-f="active" onclick="setFilter('active',this)">نشط</button>
+      <button class="gm-filter" data-f="expiring" onclick="setFilter('expiring',this)">قريب</button>
+      <button class="gm-filter" data-f="expired" onclick="setFilter('expired',this)">منتهي</button>
+    </div>
+  </div>
+
+  <div class="gm-table-wrap">
+    <table class="gm-table" dir="rtl">
+      <thead>
+        <tr>
+          <th class="col-name">الاسم</th>
+          <th class="col-start">البداية</th>
+          <th class="col-end">الانتهاء</th>
+          <th class="col-pkg">الباقة</th>
+          <th class="col-status">الحالة</th>
+          <th class="col-del"></th>
+        </tr>
+      </thead>
+      <tbody id="gm-tbody"></tbody>
+    </table>
+    <p class="gm-note" id="gm-empty" style="display:none;">لا يوجد أعضاء. أضف أول عضو من الأعلى.</p>
+  </div>
+
+</div>
+
+<script>
+  let members = [];
+  let filterMode = 'all';
+
+  const todayStr = new Date().toISOString().split('T')[0];
+  document.getElementById('inp-start').value = todayStr;
+
+  function initials(name) {
+    return name.trim().split(' ').slice(0,2).map(w => w[0]).join('').toUpperCase() || '?';
+  }
+
+  function getStatus(endDate) {
+    const today = new Date(); today.setHours(0,0,0,0);
+    const end = new Date(endDate); end.setHours(0,0,0,0);
+    const diff = Math.round((end - today) / 86400000);
+    if (diff < 0) return { label: 'منتهي', cls: 'expired', days: diff };
+    if (diff <= 7) return { label: 'ينتهي قريباً', cls: 'expiring', days: diff };
+    return { label: 'نشط', cls: 'active', days: diff };
+  }
+
+  function fmtDate(d) {
+    if (!d) return '-';
+    const [y,m,day] = d.split('-');
+    return `${day}/${m}/${y}`;
+  }
+
+  function addMember() {
+    const name = document.getElementById('inp-name').value.trim();
+    const start = document.getElementById('inp-start').value;
+    const end = document.getElementById('inp-end').value;
+    const pkg = document.getElementById('inp-pkg').value;
+    if (!name || !end) {
+      if (!name) highlight('inp-name');
+      if (!end) highlight('inp-end');
+      return;
+    }
+    members.push({ id: Date.now(), name, start, end, pkg });
+    document.getElementById('inp-name').value = '';
+    document.getElementById('inp-end').value = '';
+    render();
+  }
+
+  function highlight(id) {
+    const el = document.getElementById(id);
+    el.style.borderColor = '#E24B4A';
+    el.style.boxShadow = '0 0 0 3px rgba(226,75,74,0.15)';
+    el.focus();
+    setTimeout(() => { el.style.borderColor = ''; el.style.boxShadow = ''; }, 2000);
+  }
+
+  function deleteMember(id) {
+    members = members.filter(m => m.id !== id);
+    render();
+  }
+
+  function setFilter(f, btn) {
+    filterMode = f;
+    document.querySelectorAll('.gm-filter').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render();
+  }
+
+  function render() {
+    const search = document.getElementById('inp-search').value.trim().toLowerCase();
+    let filtered = members.filter(m => {
+      const st = getStatus(m.end);
+      const matchSearch = !search || m.name.toLowerCase().includes(search);
+      const matchFilter = filterMode === 'all' || st.cls === filterMode || (filterMode === 'expiring' && st.cls === 'expiring');
+      return matchSearch && matchFilter;
+    });
+
+    let active = 0, expiring = 0, expired = 0;
+    members.forEach(m => {
+      const s = getStatus(m.end).cls;
+      if (s === 'active') active++;
+      else if (s === 'expiring') expiring++;
+      else expired++;
+    });
+    document.getElementById('cnt-active').textContent = active;
+    document.getElementById('cnt-expiring').textContent = expiring;
+    document.getElementById('cnt-expired').textContent = expired;
+
+    const tbody = document.getElementById('gm-tbody');
+    const empty = document.getElementById('gm-empty');
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = '';
+      empty.style.display = 'block';
+    } else {
+      empty.style.display = 'none';
+      tbody.innerHTML = filtered.map(m => {
+        const st = getStatus(m.end);
+        const daysText = st.days < 0
+          ? `انتهى منذ ${Math.abs(st.days)} يوم`
+          : st.days === 0 ? 'ينتهي اليوم'
+          : `متبقي ${st.days} يوم`;
+        const daysCls = st.cls === 'active' ? 'ok' : st.cls === 'expiring' ? 'warn' : 'over';
+        return `<tr>
+          <td><div class="gm-name-cell">
+            <div class="gm-avatar">${initials(m.name)}</div>
+            <div>
+              <div style="font-weight:500;">${m.name}</div>
+              <div class="gm-days ${daysCls}">${daysText}</div>
+            </div>
+          </div></td>
+          <td>${fmtDate(m.start)}</td>
+          <td>${fmtDate(m.end)}</td>
+          <td style="color:var(--color-text-secondary)">${m.pkg}</td>
+          <td><span class="badge badge-${st.cls}">${st.label}</span></td>
+          <td><button class="gm-del" onclick="deleteMember(${m.id})" aria-label="حذف"><i class="ti ti-trash" aria-hidden="true"></i></button></td>
+        </tr>`;
+      }).join('');
+    }
+  }
+
+  render();
+</script>
